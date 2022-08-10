@@ -395,9 +395,17 @@ fn enable_or_disable_peer(
             },
         )?;
 
+        dbg!(&peer);
+        dbg!(&db_peer);
+
         if enable {
+            let peer_config = db_peer.deref().into();
+
+            dbg!(&peer_config);
+            dbg!(PeerConfigBuilder::from(&peer));
+
             DeviceUpdate::new()
-                .add_peer(PeerConfigBuilder::from(&peer))
+                .add_peer(peer_config)
                 .apply(interface, network.backend)
                 .map_err(|_| ServerError::WireGuard)?;
         } else {

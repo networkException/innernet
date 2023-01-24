@@ -80,7 +80,7 @@ struct HostsOpt {
 
 impl From<HostsOpt> for Option<PathBuf> {
     fn from(opt: HostsOpt) -> Self {
-        (!opt.no_write_hosts).then_some(opt.hosts_path)
+        if !opt.no_write_hosts { Some(opt.hosts_path) } else { None }
     }
 }
 
@@ -966,7 +966,11 @@ fn override_endpoint(
     };
 
     let endpoint_contents = if sub_opts.unset {
-        prompts::unset_override_endpoint(&sub_opts)?.then_some(EndpointContents::Unset)
+        if let Ok(result) = prompts::unset_override_endpoint(&sub_opts) {
+            if result { Some(EndpointContents::Unset) } else { None }
+        } else {
+            None
+        }
     } else {
         let endpoint = prompts::override_endpoint(&sub_opts, port)?;
         endpoint.map(EndpointContents::Set)
